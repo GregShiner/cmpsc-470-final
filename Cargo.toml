@@ -1,0 +1,7 @@
+[package]
+name = "cmpsc-470-final"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+sexp = "1.1.4"
