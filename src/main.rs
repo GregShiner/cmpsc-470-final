@@ -76,9 +76,7 @@ fn count_tokens(s_exp: &sexp::Sexp) -> TokenCount {
     match s_exp {
         sexp::Sexp::Atom(atom) => match atom {
             sexp::Atom::S(s) => {
-                println!("{:?}", s);
                 let s2: &String = &"Hello".to_owned();
-                println!("{:?}", s2);
                 if BUILTINS.contains(&s) {
                     TokenCount {
                         lists: 0,
@@ -146,21 +144,13 @@ fn count_tokens(s_exp: &sexp::Sexp) -> TokenCount {
 }
 
 fn main() {
-    println!("Hello, world!");
     let list = sexp::parse(
         "(let ((x (box 5)))
             (let ((ref (& x)))
                 (let ((y x))
-                    (unbox x \'bruh what\' 3.2))))",
+                    (unbox x))))",
     )
     .unwrap();
-    let list2 = sexp::parse("(test \"test1 test2\" 'test3 test4')").unwrap();
     println!("{:?}", list);
-    println!("{:?}", list2);
-    match list2 {
-        sexp::Sexp::List(ref l) => println!("{:?}", l),
-        _ => todo!(),
-    };
     println!("{:?}", count_tokens(&list));
-    println!("{:?}", count_tokens(&list2));
 }
