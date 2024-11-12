@@ -1,6 +1,8 @@
 use phf::phf_set;
 use sexp;
 
+pub mod parse;
+
 #[derive(Debug)]
 struct TokenCount {
     lists: u32,
