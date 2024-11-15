@@ -114,3 +114,23 @@ impl fmt::Debug for Exp {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    // Seperate modules defined in a file, by default, will not have in scope values defined in the
+    // file, but outside of the module. This is big fancy words for "Other things defined in this
+    // file will not be availble in here because this is a seperate module (denoted by the mod
+    // keyword)". This line just brings those things into scope.
+    use super::*;
+
+    /// Checks that a Num expression gets correctly formatted
+    #[test]
+    fn debug_num_test() {
+        // Instantiates a number expression containing a 5
+        let exp = Exp::Num(5);
+        // format! in this case will convert an object into its debug representation as defined in
+        // the fmt function.
+        // The assert will panic if the Exp object does not format correctly
+        assert_eq!(format!("{:?}", exp), "Num(5)");
+    }
+}
