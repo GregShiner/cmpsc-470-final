@@ -1,4 +1,6 @@
+use sexp::Sexp;
 use std::fmt;
+use thiserror::Error;
 
 #[derive(Clone)]
 enum Exp {
@@ -112,6 +114,21 @@ impl fmt::Debug for Exp {
             Exp::Display(d) => write!(f, "Display({:?})", d),
             Exp::Debug(d) => write!(f, "Debug({:?})", d),
         }
+    }
+}
+
+#[derive(Error, Debug)]
+enum ParseError {
+    #[error("This method is not yet implemented")]
+    NotImplemented,
+}
+
+fn parse(s_exp: Sexp) -> Result<Exp, ParseError> {
+    use sexp::Atom::{F, I, S};
+    use sexp::Sexp::{Atom, List};
+    match s_exp {
+        Atom(S("true")) => Ok(Exp::Bool(true)),
+        _ => Err(ParseError::NotImplemented),
     }
 }
 
