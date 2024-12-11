@@ -3,9 +3,12 @@ use std::fmt;
 use thiserror::Error;
 
 #[derive(Clone)]
-enum Exp {
-    // Number
-    Num(i32),
+pub enum Exp {
+    // Integer
+    Int(i64),
+
+    // Float
+    Float(f64),
 
     // Symbolic identifier
     Id(String),
@@ -85,7 +88,8 @@ enum Exp {
 impl fmt::Debug for Exp {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Exp::Num(n) => write!(f, "Num({})", n),
+            Exp::Int(n) => write!(f, "Int({})", n),
+            Exp::Float(n) => write!(f, "Float({})", n),
             Exp::Id(s) => write!(f, "Id({})", s),
             Exp::Plus { lhs, rhs } => write!(f, "Plus({:?}, {:?})", lhs, rhs),
             Exp::Mult { lhs, rhs } => write!(f, "Mult({:?}, {:?})", lhs, rhs),
@@ -117,18 +121,88 @@ impl fmt::Debug for Exp {
     }
 }
 
+impl TryFrom<&str> for Exp {
+    type Error = ParseError;
+    fn try_from(item: &str) -> Result<Self, Self::Error> {
+        parse(sexp::parse(item)?)
+    }
+}
+
 #[derive(Error, Debug)]
-enum ParseError {
-    #[error("This method is not yet implemented")]
+pub enum ParseError {
+    #[error("This function is not yet implemented")]
     NotImplemented,
+    #[error("Parsing error")]
+    ParseError,
+    #[error("Sexp syntax error")]
+    SexpError(#[from] Box<sexp::Error>),
 }
 
 fn parse(s_exp: Sexp) -> Result<Exp, ParseError> {
     use sexp::Atom::{F, I, S};
     use sexp::Sexp::{Atom, List};
+    use Exp::*;
     match s_exp {
-        Atom(S("true")) => Ok(Exp::Bool(true)),
-        _ => Err(ParseError::NotImplemented),
+        Atom(I(i)) => Ok(Int(i)),
+        Atom(F(f)) => Ok(Float(f)),
+        Atom(S(s)) if s == "true" => Ok(Bool(true)),
+        Atom(S(s)) if s == "false" => Ok(Bool(false)),
+        Atom(S(s)) => Ok(Id(s)),
+        List(l) => parse_list(l),
+    }
+}
+
+fn parse_list(list: Vec<Sexp>) -> Result<Exp, ParseError> {
+    use sexp::Atom::S;
+    use sexp::Sexp::Atom;
+    use std::boxed::Box;
+    use Exp::*;
+    let first = list.first().ok_or(ParseError::NotImplemented)?;
+    match (first, &list[1..]) {
+        (Atom(S(func)), [lhs, rhs]) if func == "+" => Ok(Plus {
+            lhs: Box::new(parse(lhs.clone())?),
+            rhs: Box::new(parse(rhs.clone())?),
+        }),
+        (Atom(S(func)), [lhs, rhs]) if func == "*" => Ok(Mult {
+            lhs: Box::new(parse(lhs.clone())?),
+            rhs: Box::new(parse(rhs.clone())?),
+        }),
+        (Atom(S(func)), [lhs, rhs]) if func == "=" => Ok(Eq {
+            lhs: Box::new(parse(lhs.clone())?),
+            rhs: Box::new(parse(rhs.clone())?),
+        }),
+        (Atom(S(func)), [cond, lhs, rhs]) if func == "if" => Ok(If {
+            cond: Box::new(parse(cond.clone())?),
+            lhs: Box::new(parse(lhs.clone())?),
+            rhs: Box::new(parse(rhs.clone())?),
+        }),
+        (Atom(S(func)), [rest @ ..]) if func == "begin" => {
+            let parsed_exprs: Result<Vec<Exp>, ParseError> =
+                rest.iter().map(|expr| parse(expr.clone())).collect();
+            Ok(Exp::Begin(parsed_exprs?))
+        }
+        (Atom(S(func)), [Atom(S(symbol)), body]) if func == "lambda" => Ok(Lambda {
+            symbol: symbol.to_string(),
+            body: Box::new(parse(body.clone())?),
+        }),
+        (Atom(S(func)), [exp]) if func == "ref" => Ok(Ref(Box::new(parse(exp.clone())?))),
+        (Atom(S(func)), [exp]) if func == "mut-ref" => Ok(MutRef(Box::new(parse(exp.clone())?))),
+        (Atom(S(func)), [exp]) if func == "box" => Ok(Exp::Box(Box::new(parse(exp.clone())?))),
+        (Atom(S(func)), [exp]) if func == "unbox" => Ok(Unbox(Box::new(parse(exp.clone())?))),
+        (Atom(S(func)), [exp]) if func == "deref" => Ok(Deref(Box::new(parse(exp.clone())?))),
+        (Atom(S(func)), [exp]) if func == "display" => Ok(Display(Box::new(parse(exp.clone())?))),
+        (Atom(S(func)), [exp]) if func == "debug" => Ok(Debug(Box::new(parse(exp.clone())?))),
+        (Atom(S(func)), [lhs, rhs]) if func == "set" => Ok(Set {
+            lhs: Box::new(parse(lhs.clone())?),
+            rhs: Box::new(parse(rhs.clone())?),
+        }),
+        (func_exp, [arg]) if list.len() == 2 => Ok(App {
+            // TODO: Check if len check is
+            // necessary
+            func: Box::new(parse(func_exp.clone())?),
+            arg: Box::new(parse(arg.clone())?),
+        }),
+        _ => Err(ParseError::ParseError),
     }
 }
 
@@ -144,7 +218,7 @@ mod tests {
     #[test]
     fn debug_num_test() {
         // Instantiates a number expression containing a 5
-        let exp = Exp::Num(5);
+        let exp = Exp::Int(5);
         // format! in this case will convert an object into its debug representation as defined in
         // the fmt function.
         // The assert will panic if the Exp object does not format correctly
