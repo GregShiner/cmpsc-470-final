@@ -1,4 +1,6 @@
 pub mod parse;
+#[cfg(test)]
+pub mod test_parse;
 
 fn main() -> Result<(), parse::ParseError> {
     let inputs: Vec<&str> = vec!["5", "4.5", "(+ 4 5)"];

@@ -2,7 +2,7 @@ use sexp::Sexp;
 use std::fmt;
 use thiserror::Error;
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum Exp {
     // Integer
     Int(i64),
