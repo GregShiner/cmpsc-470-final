@@ -22,3 +22,39 @@ parse_testcase!(
     },
     test_add
 );
+
+parse_testcase!(
+    "(* 6 7)",
+    Mult {
+        lhs: Box::new(Int(6)),
+        rhs: Box::new(Int(7)),
+    },
+    test_multiply
+);
+parse_testcase!(
+    "Word",
+    Id("Word".to_string()),
+    test_id
+);
+
+parse_testcase!(
+    "(= 5 5)",
+    Eq{
+        lhs: Box::new(Int(5)),
+        rhs: Box::new(Int(5)),
+    },
+    test_eq
+);
+
+parse_testcase!(
+    "(if (= 5 5) 1 0)", 
+    If {
+        cond: Box::new(Eq {
+            lhs: Box::new(Int(5)),
+            rhs: Box::new(Int(5)),
+        }),
+        lhs: Box::new(Int(1)), 
+        rhs: Box::new(Int(0)), 
+    },
+    test_if
+);
