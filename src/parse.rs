@@ -214,6 +214,13 @@ mod tests {
     // keyword)". This line just brings those things into scope.
     use super::*;
 
+    #[test]
+    fn debug_id_test(){
+        let word = String::from("Word");
+        let exp: Exp = Exp:: Id(word);
+        assert_eq!(format!("{:?}", exp), "Id(Word)");
+    }
+     
     /// Checks that a Num expression gets correctly formatted
     #[test]
     fn debug_num_test() {
@@ -224,4 +231,65 @@ mod tests {
         // The assert will panic if the Exp object does not format correctly
         assert_eq!(format!("{:?}", exp), "Num(5)");
     }
+    #[test]
+    fn debug_plus_test(){
+        let lhs: Exp = Exp::Num(5);
+        let rhs: Exp = Exp::Num(8);
+        let plus_exp = Exp::Plus {
+            lhs: Box::new(lhs),
+            rhs: Box::new(rhs),
+        };
+
+        assert_eq!(format!("{:?}",plus_exp), "Plus(Num(5), Num(8))");
+    }
+
+    }
+    #[test]
+    fn debug_mult_test(){
+        let lhs: Exp = Exp::Num(5);
+        let rhs: Exp = Exp::Num(8);
+        let mult_exp = Exp::Mult {
+            lhs: Box::new(lhs),
+            rhs: Box::new(rhs),
+        };
+
+        assert_eq!(format!("{:?}",mult_exp), "Mult(Num(5), Num(8))");
+    }
+    #[test]
+    fn debug_lambda_test(){
+        let symbol = String::from("Word");
+        let body: Exp = Exp::Num(8);
+        let lambda_exp = Exp::Lambda {
+            symbol,
+            body: Box::new(body),
+        };
+
+        assert_eq!(format!("{:?}",lambda_exp), "Lambda(Word, Num(8))");
+    }
+    #[test]
+    fn debug_if_test(){
+        let cond: Exp= Exp::Bool(true);
+        let lhs: Exp = Exp::Num(5);
+        let rhs: Exp = Exp::Num(8);
+        let if_exp = Exp::If {
+            cond: Box::new(cond),
+            lhs: Box::new(lhs),
+            rhs: Box::new(rhs),
+        };
+
+        assert_eq!(format!("{:?}",if_exp), "If(Bool(true), Num(5), Num(8))");
+    }
+    #[test]
+    fn debug_eq_test(){
+        let lhs: Exp = Exp::Num(5);
+        let rhs: Exp = Exp::Num(8);
+        let eq_exp = Exp::Eq {
+            lhs: Box::new(lhs),
+            rhs: Box::new(rhs),
+        };
+
+        assert_eq!(format!("{:?}",eq_exp), "Eq(Num(5), Num(8))");
+    }
+
 }
+//}
