@@ -349,4 +349,108 @@ mod tests {
 
         assert_eq!(format!("{:?}", eq_exp), "Eq(Int(5), Int(8))");
     }
+
+    #[test]
+
+#[test]
+fn debug_begin_test() {
+    let begin_exp = Exp::Begin(vec![Exp::Int(5), Exp::Int(8)]);
+
+    assert_eq!(format!("{:?}", begin_exp), "Begin(Int(5), Int(8))");
+}
+
+#[test]
+fn debug_ref_test() {
+    let ref_exp = Exp::Ref(Box::new(Exp::Int(5)));
+
+    assert_eq!(format!("{:?}", ref_exp), "Ref(Int(5))");
+}
+
+#[test]
+fn debug_mut_ref_test() {
+    let mut_ref_exp = Exp::MutRef(Box::new(Exp::Int(5)));
+
+    assert_eq!(format!("{:?}", mut_ref_exp), "MutRef(Int(5))");
+}
+
+#[test]
+fn debug_box_test() {
+    let box_exp = Exp::Box(Box::new(Exp::Int(5)));
+
+    assert_eq!(format!("{:?}", box_exp), "Box(Int(5))");
+}
+
+#[test]
+fn debug_unbox_test() {
+    let unbox_exp = Exp::Unbox(Box::new(Exp::Int(5)));
+
+    assert_eq!(format!("{:?}", unbox_exp), "Unbox(Int(5))");
+}
+
+#[test]
+fn debug_deref_test() {
+    let deref_exp = Exp::Deref(Box::new(Exp::Ref(Box::new(Exp::Int(5)))));
+
+    assert_eq!(format!("{:?}", deref_exp), "Deref(Ref(Int(5)))");
+}
+
+#[test]
+fn debug_set_test() {
+    let lhs = Exp::MutRef(Box::new(Exp::Int(5)));
+    let rhs = Exp::Int(10);
+    let set_exp = Exp::Set {
+        lhs: Box::new(lhs),
+        rhs: Box::new(rhs),
+    };
+
+    assert_eq!(format!("{:?}", set_exp), "Set(MutRef(Int(5)), Int(10))");
+}
+
+#[test]
+fn debug_display_test() {
+    let display_exp = Exp::Display(Box::new(Exp::Int(5)));
+
+    assert_eq!(format!("{:?}", display_exp), "Display(Int(5))");
+}
+
+#[test]
+fn debug_debug_test() {
+    let debug_exp = Exp::Debug(Box::new(Exp::Int(5)));
+
+    assert_eq!(format!("{:?}", debug_exp), "Debug(Int(5))");
+}
+
+#[test]
+fn debug_app_test() {
+    let func = Exp::Id("func".to_string());
+    let arg = Exp::Int(5);
+    let app_exp = Exp::App {
+        func: Box::new(func),
+        arg: Box::new(arg),
+    };
+
+    assert_eq!(format!("{:?}", app_exp), "App(Id(func), Int(5))");
+}
+
+// Parse tests
+/*
+#[test]
+fn test_int_literal() {
+    let result = parse(Sexp::Atom(sexp::Atom::S("5".to_string())));
+    assert_eq!(result.unwrap(), Exp::Int(5));
+}
+
+#[test]
+fn test_float_literal() {
+    let result = parse(Sexp::Atom(sexp::Atom::S("5.4".to_string())));
+    assert_eq!(result.unwrap(), Exp::Float(5.4));
+}
+ */
+#[test]
+fn test_string_literal() {
+    let result = parse(Sexp::Atom(sexp::Atom::S("word".to_string())));
+    assert_eq!(result.unwrap(), Exp::Id("word".to_string()));
+}
+
+    
 }
