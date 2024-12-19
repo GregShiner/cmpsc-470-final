@@ -85,6 +85,7 @@ Int(8)
 - **Int**: Integer values.
 - **Float**: Floating point values.
 - **Bool**: Boolean values (true or false).
+- **Closure**: Closure created from a `lambda` expression. Contains a body and captures its environment.
 - **Box**: Heap-allocated values that support ownership and borrowing.
 - **Ref**: Immutable reference to a Box.
 - **MutRef**: Mutable reference to a Box.
