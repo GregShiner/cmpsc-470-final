@@ -3,43 +3,49 @@
 ## Getting Started
 
 ### Installation
-To install the language, download the executable from the [project’s repository](#) or use the following commands in your terminal (for systems supporting Rust binaries):
+To install the language, download the executable from the [project’s repository](https://github.com/GregShiner/cmpsc-470-final/releases) or use the following commands in your terminal (for systems supporting Rust binaries):
 
 ```bash
 # Clone the repository
 git clone https://github.com/GregShiner/cmpsc-470-final.git
 cd cmpsc-470-final
 
+# Build and run the interpreter
+cargo run
+
 # Install dependencies and compile the interpreter
 cargo build --release
 
 # Run the language interpreter
-./target/release/cmpsc-470-final <filename>
+./target/release/cmpsc-470-final
 ```
 
-## Hello World
+## Quick example
+Just running the program without any arguments will put you into a REPL environment. However, you can very easily have it execute a file containing a program expression.
 
-Create a file called `hello.lisp` with the following contents:
+Create a file called `example.lisp` with the following contents:
 ```lisp
-(display "Hello world!")
+(+ 1 2)
 ```
 
 Then, if you have already compiled the binary:
 ```sh
-./target/release/cmpsc-470-final hello.lisp
+./target/release/cmpsc-470-final example.lisp
 ```
 
 Or, compile the interpreter and run it with:
 ```sh
-cargo run hello.lisp
+cargo run -- example.lisp
 ```
 
-This will print `Hello world!` to the console.
+This will print `Int(3)` to the console.
+
+The interpreter will always output the result of the expression in debug format (`<type>(<contents>)`)
 
 ## Reference
 
 ### Basic syntax
-Statements are written as s-expressions, enclosed in parentheses. Each expression can be an atomic value, an operation, or a nested expression. Code blocks are created with the begin keyword.
+Statements are written as s-expressions, enclosed in parentheses. Each expression can be an atomic value, an operation, or a nested expression. Code blocks are created with the begin keyword (NOTE: `begin` keyword interpreter has not been implemented yet).
 
 Example:
 ```lisp
@@ -47,10 +53,27 @@ Example:
   (display (+ 3 4))
   (display (+ 5 7)))
 ```
+Output:
+```
+7
+12
+Int(12)
+```
+*`begin` always returns the result of the last expression*
+
+Example:
+```lisp
+(+ 5 (- 6 3))
+```
+Output:
+```
+Int(8)
+```
 
 ### Data Types Reference
 
-- **Num**: Integer values.
+- **Int**: Integer values.
+- **Float**: Floating point values.
 - **Bool**: Boolean values (true or false).
 - **Box**: Heap-allocated values that support ownership and borrowing.
 - **Ref**: Immutable reference to a Box.
@@ -66,6 +89,7 @@ Example:
 | `*`      | Multiplication     | `(* 5 3)`            |
 | `-`      | Subtraction        | `(- 5 3)`            |
 | `/`      | Division           | `(/ 6 3)`            |
+NOTE: All arithmetic operators requires inputs to be either both ints or both floats. They will always return the same type as the input. Diving 2 integers will always do floor division.
 
 #### Comparison Operators
 | Operator | Purpose                | Example               |
@@ -75,6 +99,7 @@ Example:
 | `<`      | Less than              | `(< 3 5)`            |
 | `>=`     | Greater than or equal  | `(>= 5 5)`           |
 | `<=`     | Less than or equal     | `(<= 3 5)`           |
+NOTE: All comparison operators requires inputs to be either both ints or both floats. They will always output a `Bool` type
 
 ### Control Structures
 
@@ -82,9 +107,10 @@ Example:
 Used for conditional branching
 ```lisp
 (if (= x 0)
-    "zero"
-    "non-zero")
+    5
+    6)
 ```
+The first argument to `if`, the condition, must resolve to a `Bool`. The remaining arguments can be any type, as long as they are the same. `if` will return the value of the second argument if the condition is true, otherwise, it returns the third argument.
 
 #### Begin
 Evaluates multiple expressions in a sequence, and returns the value of the last expression.
@@ -97,15 +123,19 @@ Evaluates multiple expressions in a sequence, and returns the value of the last 
 ### Functions and Procedures
 Functions are always anonymous lambda functions that can be applied by applying arguments
 ```lisp
-((lambda (x) (* x 2)) 5) ; Doubles the input
+((lambda x (* x 2)) 5) ; Doubles the input, x. Returns Int(10)
 ```
-Define recursive functions using let-rec
+Define recursive functions using let-rec (sugar not yet implemented, although still possible by manually using y-combinator)
 ```lisp
 (let-rec ((factorial (lambda (n)
                         (if (= n 1)
                             1
                             (* n (factorial (- n 1)))))))
   (factorial 5))
+```
+You can also create a value binding using the `let` syntactical sugar
+```lisp
+(let (x 5) (* x 3)) ; outputs 15
 ```
 
 ## Best Practices
@@ -115,21 +145,29 @@ Define recursive functions using let-rec
 
 ## Grammar
 ```antlr
-<exp> ::= <num>
+<exp> ::= <int>
+        | <float>
         | <id>
         | true
         | false
         | (+ <exp> <exp>)
+        | (- <exp> <exp>)
         | (* <exp> <exp>)
+        | (/ <exp> <exp>)
         | (lambda (<id>) <exp>)
+        | (let (<id> <exp>) exp)
         | (<exp> <exp>)  ; function application
         | (if <exp> <exp> <exp>)
         | (= <exp> <exp>)
-        | (begin <exp>*)
-        | (& <exp>)      ; immutable reference
-        | (! <exp>)      ; mutable reference
-        | (box <exp>)
-        | (unbox <exp>)
-        | (@ <exp>)      ; dereference
-        | (:= <exp> <exp>) ; set mutable reference
+        | (> <exp> <exp>)
+        | (< <exp> <exp>)
+        | (>= <exp> <exp>)
+        | (<= <exp> <exp>)
+        | (begin <exp>*) ; (interpreter not yet implemented)
+        | (& <exp>)      ; immutable reference (interpreter not yet implemented)
+        | (! <exp>)      ; mutable reference (interpreter not yet implemented)
+        | (box <exp>)    ; (interpreter not yet implemented)
+        | (unbox <exp>)  ; (interpreter not yet implemented)
+        | (@ <exp>)      ; dereference (interpreter not yet implemented)
+        | (:= <exp> <exp>) ; set mutable reference (interpreter not yet implemented)
 ```
