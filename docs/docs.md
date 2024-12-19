@@ -28,6 +28,9 @@ cargo build --release
 
 # Run the language interpreter with a file input
 ./target/release/cmpsc-470-final input.lisp
+
+# Run the tests
+cargo test
 ```
 
 ## Quick example
