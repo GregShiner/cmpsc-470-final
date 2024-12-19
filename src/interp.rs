@@ -58,6 +58,8 @@ pub enum InterpError {
     CantDisplay,
     #[error("Cannot find symbol '{0}'")]
     SymbolNotFound(String),
+    #[error("Only closures can be applied")]
+    NotAClosure,
 }
 
 // Helper function for numeric operations that work on both ints and floats
@@ -227,8 +229,22 @@ pub fn interp(exp: Exp, env: &mut Env) -> Result<Value, InterpError> {
             .get(&s)
             .ok_or(InterpError::SymbolNotFound(s))
             .map(|v| v.clone()),
-        Exp::Lambda { symbol, body } => Err(InterpError::NotImplemented("Lambda".to_string())),
-        Exp::App { func, arg } => Err(InterpError::NotImplemented("App".to_string())),
+        Exp::Lambda { arg, body } => Ok(Value::Closure {
+            arg,
+            body: *body,
+            env: env.clone(),
+        }),
+        Exp::App { func, arg } => match interp(*func, env)? {
+            Value::Closure {
+                arg: c_arg,
+                body,
+                env: mut c_env,
+            } => interp(body, {
+                c_env.insert(c_arg, interp(*arg, env)?);
+                &mut c_env
+            }),
+            _ => Err(InterpError::NotAClosure),
+        },
         Exp::Begin(es) => Err(InterpError::NotImplemented("Begin".to_string())),
         Exp::Ref(b) => Err(InterpError::NotImplemented("Ref".to_string())),
         Exp::MutRef(b) => Err(InterpError::NotImplemented("MutRef".to_string())),

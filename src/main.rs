@@ -1,5 +1,7 @@
 use std::{
     collections::HashMap,
+    env,
+    fs::read_to_string,
     io::{self, Write},
 };
 
@@ -9,6 +11,19 @@ pub mod parse;
 pub mod test_parse;
 
 fn main() -> io::Result<()> {
+    let args: Vec<String> = env::args().collect();
+    if args.len() > 1 {
+        let filename = &args[1];
+        let input = read_to_string(filename)?;
+        match parse::Exp::try_from(&input[..]) {
+            Ok(exp) => match interp::interp(exp, &mut HashMap::new()) {
+                Ok(value) => println!("{:?}", value),
+                Err(e) => println!("Evaluation error: {}", e),
+            },
+            Err(e) => println!("Parse error: {}", e),
+        }
+        return Ok(());
+    }
     println!("Welcome to the expression evaluator REPL!");
     println!("Enter expressions to evaluate them, or 'exit' to quit.");
     println!("Example expressions:");
