@@ -25,14 +25,16 @@ This language actually only has a single syntactic structure, the expression. Th
 | `display`     | Print a value to the screen      |
 
 ### Data Types
-| Type    | Size     | Description                                  |
-| ------- | -------- | -------------------------------------------- |
-| `Num`   | Integer  | Fixed-size integer                           |
-| `Bool`  | Boolean  | Represents `true` or `false`                 |
-| `Box`   | Dynamic  | Heap-allocated, ownable value                |
-| `Ref`   | Dynamic  | Immutable reference to a boxed value         |
-| `MutRef`| Dynamic  | Mutable reference to a boxed value           |
-| `Moved` | N/A      | Represents a moved (invalid) value           |
+| Type     | Size     | Description                                  |
+| -------- | -------- | -------------------------------------------- |
+| `Int`    | i64      | Fixed-size integer                           |
+| `Float`  | f64      | Double precision floating point number       |
+| `Bool`   | Boolean  | Represents `true` or `false`                 |
+| `Closure`| Dynamic  | Stores a function with an environment        |
+| `Box`    | Dynamic  | Heap-allocated, ownable value                |
+| `Ref`    | Dynamic  | Immutable reference to a boxed value         |
+| `MutRef` | Dynamic  | Mutable reference to a boxed value           |
+| `Moved`  | N/A      | Represents a moved (invalid) value           |
 
 ### Operators
 
@@ -56,11 +58,11 @@ This language actually only has a single syntactic structure, the expression. Th
 ### Control Structures
 
 #### Selection Sequences
-Conditional expressions use the `if` keyword:
+Conditional expressions use the `if` function:
 ```lisp
 (if (= x 0)
-    "zero"
-    "non-zero")
+    5
+    6)
 ```
 
 ### Repetition Sequences
