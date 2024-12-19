@@ -14,13 +14,23 @@ pub enum Exp {
     Id(String),
 
     // Addition; lhs and rhs must resolve to a Num
-    Plus {
+    Add {
+        lhs: Box<Exp>,
+        rhs: Box<Exp>,
+    },
+
+    Sub {
         lhs: Box<Exp>,
         rhs: Box<Exp>,
     },
 
     // Multiplication; lhs and rhs must resolve to a Num
     Mult {
+        lhs: Box<Exp>,
+        rhs: Box<Exp>,
+    },
+
+    Div {
         lhs: Box<Exp>,
         rhs: Box<Exp>,
     },
@@ -47,6 +57,26 @@ pub enum Exp {
 
     // Equality; lhs and rhs must resolve to numbers
     Eq {
+        lhs: Box<Exp>,
+        rhs: Box<Exp>,
+    },
+
+    Gt {
+        lhs: Box<Exp>,
+        rhs: Box<Exp>,
+    },
+
+    Ge {
+        lhs: Box<Exp>,
+        rhs: Box<Exp>,
+    },
+
+    Lt {
+        lhs: Box<Exp>,
+        rhs: Box<Exp>,
+    },
+
+    Le {
         lhs: Box<Exp>,
         rhs: Box<Exp>,
     },
@@ -91,12 +121,18 @@ impl fmt::Debug for Exp {
             Exp::Int(n) => write!(f, "Int({})", n),
             Exp::Float(n) => write!(f, "Float({})", n),
             Exp::Id(s) => write!(f, "Id({})", s),
-            Exp::Plus { lhs, rhs } => write!(f, "Plus({:?}, {:?})", lhs, rhs),
+            Exp::Add { lhs, rhs } => write!(f, "Add({:?}, {:?})", lhs, rhs),
+            Exp::Sub { lhs, rhs } => write!(f, "Sub({:?}, {:?})", lhs, rhs),
             Exp::Mult { lhs, rhs } => write!(f, "Mult({:?}, {:?})", lhs, rhs),
+            Exp::Div { lhs, rhs } => write!(f, "Div({:?}, {:?})", lhs, rhs),
             Exp::Lambda { symbol, body } => write!(f, "Lambda({}, {:?})", symbol, body),
             Exp::App { func, arg } => write!(f, "App({:?}, {:?})", func, arg),
             Exp::If { cond, lhs, rhs } => write!(f, "If({:?}, {:?}, {:?})", cond, lhs, rhs),
             Exp::Eq { lhs, rhs } => write!(f, "Eq({:?}, {:?})", lhs, rhs),
+            Exp::Gt { lhs, rhs } => write!(f, "Gt({:?}, {:?})", lhs, rhs),
+            Exp::Ge { lhs, rhs } => write!(f, "Ge({:?}, {:?})", lhs, rhs),
+            Exp::Lt { lhs, rhs } => write!(f, "Lt({:?}, {:?})", lhs, rhs),
+            Exp::Le { lhs, rhs } => write!(f, "Le({:?}, {:?})", lhs, rhs),
             Exp::Begin(exprs) => {
                 write!(f, "Begin(")?;
                 let mut iter = exprs.iter();
@@ -159,7 +195,11 @@ fn parse_list(list: Vec<Sexp>) -> Result<Exp, ParseError> {
     use Exp::*;
     let first = list.first().ok_or(ParseError::NotImplemented)?;
     match (first, &list[1..]) {
-        (Atom(S(func)), [lhs, rhs]) if func == "+" => Ok(Plus {
+        (Atom(S(func)), [lhs, rhs]) if func == "+" => Ok(Add {
+            lhs: Box::new(parse(lhs.clone())?),
+            rhs: Box::new(parse(rhs.clone())?),
+        }),
+        (Atom(S(func)), [lhs, rhs]) if func == "-" => Ok(Sub {
             lhs: Box::new(parse(lhs.clone())?),
             rhs: Box::new(parse(rhs.clone())?),
         }),
@@ -167,12 +207,27 @@ fn parse_list(list: Vec<Sexp>) -> Result<Exp, ParseError> {
             lhs: Box::new(parse(lhs.clone())?),
             rhs: Box::new(parse(rhs.clone())?),
         }),
+        (Atom(S(func)), [lhs, rhs]) if func == "/" => Ok(Div {
+            lhs: Box::new(parse(lhs.clone())?),
+            rhs: Box::new(parse(rhs.clone())?),
+        }),
         (Atom(S(func)), [lhs, rhs]) if func == "=" => Ok(Eq {
             lhs: Box::new(parse(lhs.clone())?),
             rhs: Box::new(parse(rhs.clone())?),
         }),
-        (Atom(S(func)), [cond, lhs, rhs]) if func == "if" => Ok(If {
-            cond: Box::new(parse(cond.clone())?),
+        (Atom(S(func)), [lhs, rhs]) if func == "<" => Ok(Lt {
+            lhs: Box::new(parse(lhs.clone())?),
+            rhs: Box::new(parse(rhs.clone())?),
+        }),
+        (Atom(S(func)), [lhs, rhs]) if func == ">" => Ok(Gt {
+            lhs: Box::new(parse(lhs.clone())?),
+            rhs: Box::new(parse(rhs.clone())?),
+        }),
+        (Atom(S(func)), [lhs, rhs]) if func == "<=" => Ok(Le {
+            lhs: Box::new(parse(lhs.clone())?),
+            rhs: Box::new(parse(rhs.clone())?),
+        }),
+        (Atom(S(func)), [lhs, rhs]) if func == ">=" => Ok(Ge {
             lhs: Box::new(parse(lhs.clone())?),
             rhs: Box::new(parse(rhs.clone())?),
         }),
@@ -201,6 +256,11 @@ fn parse_list(list: Vec<Sexp>) -> Result<Exp, ParseError> {
             // necessary
             func: Box::new(parse(func_exp.clone())?),
             arg: Box::new(parse(arg.clone())?),
+        }),
+        (Atom(S(func)), [cond, lhs, rhs]) if func == "if" => Ok(If {
+            cond: Box::new(parse(cond.clone())?),
+            lhs: Box::new(parse(lhs.clone())?),
+            rhs: Box::new(parse(rhs.clone())?),
         }),
         _ => Err(ParseError::ParseError),
     }
@@ -235,12 +295,12 @@ mod tests {
     fn debug_plus_test() {
         let lhs: Exp = Exp::Int(5);
         let rhs: Exp = Exp::Int(8);
-        let plus_exp = Exp::Plus {
+        let plus_exp = Exp::Add {
             lhs: Box::new(lhs),
             rhs: Box::new(rhs),
         };
 
-        assert_eq!(format!("{:?}", plus_exp), "Plus(Int(5), Int(8))");
+        assert_eq!(format!("{:?}", plus_exp), "Add(Int(5), Int(8))");
     }
 
     #[test]
