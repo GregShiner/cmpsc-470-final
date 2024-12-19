@@ -16,7 +16,7 @@ parse_testcase!("5", Int(5), test_int);
 parse_testcase!("5.4", Float(5.4), test_float);
 parse_testcase!(
     "(+ 4 7)",
-    Plus {
+    Add {
         lhs: Box::new(Int(4)),
         rhs: Box::new(Int(7)),
     },

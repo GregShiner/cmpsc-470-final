@@ -295,12 +295,12 @@ mod tests {
     fn debug_plus_test() {
         let lhs: Exp = Exp::Int(5);
         let rhs: Exp = Exp::Int(8);
-        let plus_exp = Exp::Plus {
+        let plus_exp = Exp::Add {
             lhs: Box::new(lhs),
             rhs: Box::new(rhs),
         };
 
-        assert_eq!(format!("{:?}", plus_exp), "Plus(Int(5), Int(8))");
+        assert_eq!(format!("{:?}", plus_exp), "Add(Int(5), Int(8))");
     }
 
     #[test]
