@@ -1,23 +1,33 @@
 # Documentation
 
 ## Getting Started
+### Dependancies
+If you would like to build the program yourself, you will need rust and cargo installed.
+Install them by following the instructions on [rustup](https://rustup.rs/)
 
 ### Installation
-To install the language, download the executable from the [project’s repository](https://github.com/GregShiner/cmpsc-470-final/releases) or use the following commands in your terminal (for systems supporting Rust binaries):
+To install the language, download the executable from the [project’s repository](https://github.com/GregShiner/cmpsc-470-final/releases) or use the following commands in your terminal:
 
 ```bash
 # Clone the repository
 git clone https://github.com/GregShiner/cmpsc-470-final.git
 cd cmpsc-470-final
 
-# Build and run the interpreter
+# Build and run the interpreter in REPL mode
 cargo run
 
+# Build and run the interpreter with a file input
+cargo run -- input.lisp
+
+# Or compile the binary yourself first
 # Install dependencies and compile the interpreter
 cargo build --release
 
-# Run the language interpreter
+# Run the language interpreter in REPL mode
 ./target/release/cmpsc-470-final
+
+# Run the language interpreter with a file input
+./target/release/cmpsc-470-final input.lisp
 ```
 
 ## Quick example
