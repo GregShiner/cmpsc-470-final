@@ -218,9 +218,9 @@ pub fn interp(exp: Exp, env: &mut Env) -> Result<Value, InterpError> {
         Exp::Display(e) => {
             let v = interp(*e, env)?;
             match v {
-                Value::Int(i) => print!("{}", i),
-                Value::Float(f) => print!("{}", f),
-                Value::Bool(b) => print!("{}", b),
+                Value::Int(i) => print!("{}\n", i),
+                Value::Float(f) => print!("{}\n", f),
+                Value::Bool(b) => print!("{}\n", b),
                 _ => return Err(InterpError::CantDisplay),
             }
             Ok(v)
